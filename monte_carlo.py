@@ -1,6 +1,7 @@
 import numpy as np
 
 from linear_regression import LinearRegression, RegressionMethods
+from monte_carlo_criteria import MonteCarloCriteria, MonteCarloEvaluator
 
 
 class MonteCarlo:
@@ -10,7 +11,7 @@ class MonteCarlo:
         self.X = X
         self.Y = Y
 
-    def run(self, regression_method: RegressionMethods, k: float | None = None) -> np.ndarray:
+    def run(self, regression_method: RegressionMethods, evaluation_criteria: MonteCarloCriteria = MonteCarloCriteria.REGRESSION, k: float | None = None, ) -> np.ndarray:
         results = []
         N, _ = self.X.shape
         for _ in range(self.R):
@@ -37,16 +38,14 @@ class MonteCarlo:
             model = LinearRegression(X_train, Y_train)
             model.train(regression_method, k)
             pred = model.predict(X_test)
-            score = np.sum((Y_test - pred) ** 2)
+            score = MonteCarloEvaluator.evaluate(pred, Y_test, evaluation_criteria)
             results.append(score)
         diffs = np.array(results)
-        results = np.array(
-            [
-                np.mean(diffs),
-                np.std(diffs),
-                np.max(diffs),
-                np.min(diffs)
-            ]
-        )
-        return results
+        result = {
+            "mean": np.mean(diffs),
+            "std": np.std(diffs),
+            "max": np.max(diffs),
+            "min": np.min(diffs)
+        }
+        return result
 

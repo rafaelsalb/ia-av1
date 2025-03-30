@@ -1,18 +1,22 @@
+import logging
 import numpy as np
 
 from base_classifier_model import BaseClassifierModel
 
 
+logger = logging.getLogger("main")
+
+
 class ClassifierMonteCarlo:
     @staticmethod
     def run(rounds: int, model: BaseClassifierModel, ratio: float, X: np.ndarray, Y: np.ndarray, least_squares: bool = False):
-        _X = X
-        _Y = Y
+        _X = X.T if least_squares else X
+        _Y = Y.T if least_squares else Y
         results = []
         p, N = X.shape
         for i in range(rounds):
             if i % 100 == 0:
-                print(f"Round {i}")
+                logger.info(f"Round {i}")
             perm = np.random.permutation(N)
             Xr = _X[:, perm]
             Yr = _Y[:, perm]
@@ -35,7 +39,7 @@ class ClassifierMonteCarlo:
 
             results.append(score)
         else:
-            print(f"Round {rounds}")
+            logger.info(f"Round {rounds}")
 
         diffs = np.array(results)
         result = {

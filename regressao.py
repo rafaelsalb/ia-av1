@@ -1,3 +1,4 @@
+import json
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -5,7 +6,7 @@ from linear_regression import LinearRegression, RegressionMethods
 from monte_carlo import MonteCarlo
 
 
-data = np.loadtxt("av1/atividade_enzimatica.csv", delimiter=",")
+data = np.loadtxt("atividade_enzimatica.csv", delimiter=",")
 
 
 def predict_and_plot(data: np.ndarray, X: np.ndarray, sample_size: int, model: LinearRegression, axes: plt.Axes, **kwargs):
@@ -72,9 +73,18 @@ for i, h in enumerate(hyper):
     predict_and_plot(data, X, 100, model, ax, **graph_settings)
 
 monte_carlo = MonteCarlo(X, Y, 0.8, 500)
+mean = monte_carlo.run(RegressionMethods.MEAN)
+with open(f"monte_carlo\\regressao-mean.json", "w") as f:
+    json.dump(mean, f)
+mqo = monte_carlo.run(RegressionMethods.LEAST_SQUARES)
+with open(f"monte_carlo\\regressao-mqo.json", "w") as f:
+    json.dump(mqo, f)
 print("mean\t", monte_carlo.run(RegressionMethods.MEAN))
 print("mqo\t", monte_carlo.run(RegressionMethods.LEAST_SQUARES))
 for h in hyper:
-    print(f"{h:.2f}\t", monte_carlo.run(RegressionMethods.TIKHONOV, h))
+    mqo_r = monte_carlo.run(RegressionMethods.TIKHONOV, k=h)
+    with open(f"monte_carlo\\regressao-mqo_r{h}.json", "w") as f:
+        json.dump(mqo_r, f)
+    print(f"{h:.2f}\t", mqo_r)
 
 plt.show()
